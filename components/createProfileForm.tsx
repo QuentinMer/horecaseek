@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 export default function CreateProfileForm() {
   const supabase = createClient();
@@ -77,9 +78,13 @@ export default function CreateProfileForm() {
 
       if (insertError) throw new Error(insertError.message);
 
-      router.push("/dashboard"); 
-    } catch (err: any) {
-      setError(err.message || "An unknown error occurred");
+      router.push("/dashboard");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Une erreur inconnue est survenue");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -127,10 +132,12 @@ export default function CreateProfileForm() {
           }}
         />
         {avatarPreview && (
-          <img
+          <Image
             src={avatarPreview}
             alt="Preview"
-            className="w-24 h-24 rounded-full object-cover mt-2"
+            width={96}
+            height={96}
+            className="rounded-full object-cover mt-2"
           />
         )}
       </div>

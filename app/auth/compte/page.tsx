@@ -24,16 +24,19 @@ interface Establishment {
   longitude: number;
   price_range: number;
   gallery_urls: string[];
+  user_id: string;
 }
 
 interface Spot {
   id: string;
+  name: string;
   description: string;
   latitude: number;
   longitude: number;
   votes_sum: number;
   votes_count: number;
   image_urls?: string[];
+  user_id: string;
 }
 
 export default function ProfileCard() {
@@ -44,73 +47,70 @@ export default function ProfileCard() {
   const [loading, setLoading] = useState(true);
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [spots, setSpots] = useState<Spot[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const bgClass = profile && profile.type === "professional" ? "bg-secondary" : "bg-primary";
   const borderClass = profile && profile.type === "professional" ? "border-secondary" : "border-primary";
 
   useEffect(() => {
     const fetchProfileAndData = async () => {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+      setLoading(true);
+      setError(null);
 
-      if (userError || !user) {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !userData?.user) {
         setLoading(false);
         router.push("/auth/login");
         return;
       }
 
-      // Fetch profile
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("full_name, phone, avatar_url, type")
-        .eq("user_id", user.id)
-        .single();
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("full_name, phone, avatar_url, type")
+          .eq("user_id", userData.user.id)
+          .single();
 
-      if (profileError) {
-        console.error("Erreur récupération profil :", profileError.message);
-        setLoading(false);
-        return;
-      }
+        if (profileError || !profileData) throw new Error(profileError?.message || "Profil non trouvé");
 
-      setProfile(profileData);
+        setProfile(profileData);
 
-      if (profileData.type === "professional") {
-        // Récupérer établissements liés à l'utilisateur
-        const { data: estData, error: estError } = await supabase
-          .from("establishments")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
+        if (profileData.type === "professional") {
+          const { data: estData, error: estError } = await supabase
+            .from("establishments")
+            .select("*")
+            .eq("user_id", userData.user.id)
+            .order("created_at", { ascending: false });
 
-        if (estError) {
-          console.error("Erreur récupération établissements :", estError.message);
-        } else {
+          if (estError) throw new Error(estError.message);
           setEstablishments(estData || []);
-        }
-      } else {
-        // Récupérer spots liés à l'utilisateur (client)
-        const { data: spotsData, error: spotsError } = await supabase
-          .from("spots")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-
-        if (spotsError) {
-          console.error("Erreur récupération spots :", spotsError.message);
         } else {
+          const { data: spotsData, error: spotsError } = await supabase
+            .from("spots")
+            .select("*")
+            .eq("user_id", userData.user.id)
+            .order("created_at", { ascending: false });
+
+          if (spotsError) throw new Error(spotsError.message);
           setSpots(spotsData || []);
         }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Erreur lors de la récupération des données");
+        }
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     fetchProfileAndData();
   }, [supabase, router]);
 
   if (loading) return <p>Chargement du profil...</p>;
+  if (error) return <p className="text-red-600 text-center my-8">{error}</p>;
   if (!profile) return <p>Profil introuvable.</p>;
 
   return (
@@ -126,7 +126,7 @@ export default function ProfileCard() {
               alt="Avatar"
               width={1000}
               height={1000}
-              className="w-full relative h-full rounded-md object-cover"
+              className="w-2/3 relative h-2/3 mx-auto rounded-md object-cover"
             />
           )}
           <h2 className="text-xl font-semibold mt-4 text-center">{profile.full_name}</h2>
@@ -183,32 +183,53 @@ export default function ProfileCard() {
               Ajouter un spot
             </Link>
 
-            {spots.length === 0 ? (
-              <p>Aucun spot ajouté pour le moment.</p>
-            ) : (
-              <ul className="flex flex-col gap-3 w-full">
-                {spots.map((spot) => {
-                  const avgVote = spot.votes_count > 0 ? (spot.votes_sum / spot.votes_count).toFixed(1) : "N/A";
-                  return (
-                    <li
-                      key={spot.id}
-                      className="border rounded p-3 flex justify-between items-center"
-                    >
-                      <div>
-                        <p className="font-medium">{spot.description}</p>
-                        <p className="text-sm text-gray-600">Note moyenne : {avgVote} / 5</p>
-                      </div>
-                      <button
-                        className="text-blue-600 hover:underline"
-                        onClick={() => router.push(`/protected/spot/${spot.id}`)}
-                      >
-                        Modifier
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+         {spots.length === 0 ? (
+  <p>Aucun spot ajouté pour le moment.</p>
+) : (
+  <ul className="flex flex-col gap-3 w-full">
+    {spots.map((spot) => {
+      const avgVote =
+        spot.votes_count > 0
+          ? (spot.votes_sum / spot.votes_count).toFixed(1)
+          : "N/A";
+
+      return (
+        <li
+          key={spot.id}
+          className="border rounded p-3 flex gap-3 items-center"
+        >
+          {spot.image_urls && spot.image_urls.length > 0 && (
+            <div className="flex-shrink-0">
+              <Image
+                src={spot.image_urls[0]}
+                alt={`Image du spot`}
+                width={80}
+                height={80}
+                className="rounded object-cover"
+                unoptimized
+              />
+            </div>
+          )}
+
+          <div className="flex-1">
+            <p className="font-medium">{spot.name}</p>
+            <p className="text-sm text-gray-600">{spot.description}</p>
+            <p className="text-sm text-gray-600">
+              Note moyenne : {avgVote} / 5
+            </p>
+          </div>
+
+          <button
+            className="text-blue-600 hover:underline"
+            onClick={() => router.push(`/protected/spot/${spot.id}`)}
+          >
+            Modifier
+          </button>
+        </li>
+      );
+    })}
+  </ul>
+)}
           </>
         )}
       </div>

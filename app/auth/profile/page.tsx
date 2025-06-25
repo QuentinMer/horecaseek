@@ -6,8 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-
-
+import Image from "next/image";
 
 export default function ProfileForm() {
   const supabase = createClient();
@@ -24,21 +23,25 @@ export default function ProfileForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-
   useEffect(() => {
     const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data?.user) {
         router.push("/auth/login");
         return;
       }
-      setUserId(user.id);
+      setUserId(data.user.id);
 
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("full_name, phone, avatar_url, type")
-        .eq("user_id", user.id)
+        .eq("user_id", data.user.id)
         .maybeSingle();
+
+      if (profileError) {
+        console.error("Erreur récupération profil :", profileError);
+        return;
+      }
 
       if (profileData) {
         setFullName(profileData.full_name || "");
@@ -71,21 +74,15 @@ export default function ProfileForm() {
       if (avatarFile && userId) {
         const fileExt = avatarFile.name.split(".").pop();
 
-        if (!fileExt) {
-          throw new Error("Impossible de déterminer l'extension du fichier.");
-        }
+        if (!fileExt) throw new Error("Impossible de déterminer l'extension du fichier.");
 
         const fileName = `${userId}.${fileExt}`;
-        console.log("Nom final du fichier envoyé :", fileName);
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("avatars")
           .upload(fileName, avatarFile, { upsert: true });
 
-        if (uploadError) {
-          console.error("Erreur lors de l'upload :", uploadError);
-          throw new Error(uploadError.message);
-        }
+        if (uploadError) throw new Error(uploadError.message);
 
         const { data: publicUrlData } = supabase.storage
           .from("avatars")
@@ -105,8 +102,12 @@ export default function ProfileForm() {
       if (upsertError) throw new Error(upsertError.message);
 
       router.push("/auth/compte"); // Redirection après succès
-    } catch (err: any) {
-      setError(err.message || "Une erreur est survenue");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Une erreur est survenue");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -163,9 +164,21 @@ export default function ProfileForm() {
           }}
         />
         {avatarPreview ? (
-          <img src={avatarPreview} alt="Preview" className="w-24 h-24 rounded-full object-cover mt-2" />
+          <Image
+            src={avatarPreview}
+            alt="Preview"
+            width={96}
+            height={96}
+            className="rounded-full object-cover mt-2"
+          />
         ) : existingAvatarUrl ? (
-          <img src={existingAvatarUrl} alt="Avatar" className="w-24 h-24 rounded-full object-cover mt-2" />
+          <Image
+            src={existingAvatarUrl}
+            alt="Avatar"
+            width={96}
+            height={96}
+            className="rounded-full object-cover mt-2"
+          />
         ) : null}
       </div>
 

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 interface Spot {
   id: string;
@@ -17,7 +18,6 @@ interface Spot {
 
 export default function SpotDetail() {
   const supabase = createClient();
-  const router = useRouter();
   const pathname = usePathname();
 
   const spotId = pathname.split("/").pop() || ""; // Extract id from URL
@@ -62,7 +62,6 @@ export default function SpotDetail() {
     setError(null);
 
     try {
-      // Upsert the vote (simple approach, no per-user vote tracking)
       const newVotesSum = (spot.votes_sum || 0) + vote;
       const newVotesCount = (spot.votes_count || 0) + 1;
 
@@ -77,7 +76,7 @@ export default function SpotDetail() {
         setSpot({ ...spot, votes_sum: newVotesSum, votes_count: newVotesCount });
         setUserVote(vote);
       }
-    } catch (err) {
+    } catch {
       setError("Erreur lors de l’enregistrement du vote");
     } finally {
       setSubmitting(false);
@@ -97,11 +96,14 @@ export default function SpotDetail() {
       {spot.image_urls.length > 0 && (
         <div className="flex gap-4 overflow-x-auto mb-4">
           {spot.image_urls.map((url, i) => (
-            <img
+            <Image
               key={i}
               src={url}
               alt={`Spot image ${i + 1}`}
-              className="h-40 w-40 object-cover rounded"
+              width={160}
+              height={160}
+              className="rounded object-cover"
+              unoptimized
             />
           ))}
         </div>

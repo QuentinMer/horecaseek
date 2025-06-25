@@ -79,8 +79,12 @@ export default function AddSpotPage() {
       setLongitude("");
       setImages([]);
       setVote(3);
-    } catch (err: any) {
-      setError(err.message || "Une erreur est survenue");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Une erreur est survenue");
+      }
     } finally {
       setLoading(false);
     }

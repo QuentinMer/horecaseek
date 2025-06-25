@@ -7,6 +7,7 @@ import Link from "next/link";
 export default function NewSpotPage() {
   const supabase = createClient();
 
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [latitude, setLatitude] = useState<number | "">("");
   const [longitude, setLongitude] = useState<number | "">("");
@@ -41,8 +42,19 @@ export default function NewSpotPage() {
     setLoading(true);
     setError(null);
 
-    if (latitude === "" || longitude === "") {
-      setError("Latitude et longitude sont obligatoires");
+    if (!name.trim()) {
+      setError("Le nom du spot est obligatoire");
+      setLoading(false);
+      return;
+    }
+
+    if (
+      latitude === "" ||
+      longitude === "" ||
+      isNaN(Number(latitude)) ||
+      isNaN(Number(longitude))
+    ) {
+      setError("Latitude et longitude sont obligatoires et doivent être valides");
       setLoading(false);
       return;
     }
@@ -57,9 +69,10 @@ export default function NewSpotPage() {
         .from("spots")
         .insert({
           user_id: user.id,
+          name,
           description,
-          latitude,
-          longitude,
+          latitude: Number(latitude),
+          longitude: Number(longitude),
           image_urls: imageUrls,
           votes_sum: vote,
           votes_count: 1,
@@ -68,13 +81,19 @@ export default function NewSpotPage() {
       if (insertError) throw insertError;
 
       alert("Spot ajouté avec succès !");
+      setName("");
       setDescription("");
       setLatitude("");
       setLongitude("");
       setImages([]);
       setVote(3);
-    } catch (err: any) {
-      setError(err.message || "Une erreur est survenue");
+      // router.push("/auth/compte");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Une erreur est survenue");
+      }
     } finally {
       setLoading(false);
     }
@@ -84,12 +103,24 @@ export default function NewSpotPage() {
     <div className="max-w-md mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Ajouter un Spot</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        
+        <label>
+          Nom du spot
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full border rounded p-2"
+          />
+        </label>
+
         <label>
           Description
           <textarea
             required
             value={description}
-            onChange={e => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value)}
             className="w-full border rounded p-2"
           />
         </label>
@@ -101,7 +132,10 @@ export default function NewSpotPage() {
             step="any"
             required
             value={latitude}
-            onChange={e => setLatitude(parseFloat(e.target.value))}
+            onChange={(e) => {
+              const val = e.target.value;
+              setLatitude(val === "" ? "" : parseFloat(val));
+            }}
             className="w-full border rounded p-2"
           />
         </label>
@@ -113,7 +147,10 @@ export default function NewSpotPage() {
             step="any"
             required
             value={longitude}
-            onChange={e => setLongitude(parseFloat(e.target.value))}
+            onChange={(e) => {
+              const val = e.target.value;
+              setLongitude(val === "" ? "" : parseFloat(val));
+            }}
             className="w-full border rounded p-2"
           />
         </label>
@@ -124,7 +161,7 @@ export default function NewSpotPage() {
             type="file"
             accept="image/*"
             multiple
-            onChange={e => setImages(e.target.files ? Array.from(e.target.files) : [])}
+            onChange={(e) => setImages(e.target.files ? Array.from(e.target.files) : [])}
             className="w-full"
           />
         </label>
@@ -133,10 +170,10 @@ export default function NewSpotPage() {
           Note initiale
           <select
             value={vote}
-            onChange={e => setVote(parseInt(e.target.value))}
+            onChange={(e) => setVote(parseInt(e.target.value))}
             className="w-full border rounded p-2"
           >
-            {[1,2,3,4,5].map(n => (
+            {[1, 2, 3, 4, 5].map((n) => (
               <option key={n} value={n}>{n}</option>
             ))}
           </select>
@@ -152,8 +189,8 @@ export default function NewSpotPage() {
           {loading ? "Ajout en cours..." : "Ajouter le spot"}
         </button>
       </form>
-    
-      <Link href="/auth/compte" className="text-blue-600 ">
+
+      <Link href="/auth/compte" className="text-blue-600 mt-4 block">
         Retour à mon compte
       </Link>
     </div>

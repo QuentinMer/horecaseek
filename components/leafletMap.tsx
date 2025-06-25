@@ -3,18 +3,10 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect } from "react";
-
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "/assets/icons/custom-icons/marker-icon-2x.png",
-  iconUrl: "/assets/icons/custom-icons/marker-icon.png",
-  shadowUrl: "/assets/icons/custom-icons/marker-shadow.png",
-});
 
 interface Spot {
   id: string;
+  name?: string;
   description: string;
   latitude: number;
   longitude: number;
@@ -23,22 +15,40 @@ interface Spot {
 interface LeafletMapProps {
   spots: Spot[];
   center: [number, number];
-  zoom?: number;
+  zoom: number;
+  selectedSpot?: Spot | null;
 }
 
-export default function LeafletMap({ spots, center, zoom = 13 }: LeafletMapProps) {
-  useEffect(() => {}, []);
+// Fix des icônes Leaflet
+const icon = L.icon({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
+L.Marker.prototype.options.icon = icon;
+
+export default function LeafletMap({
+  spots,
+  center,
+  zoom,
+}: LeafletMapProps) {
   return (
-    <MapContainer center={center} zoom={zoom} scrollWheelZoom style={{ height: "400px", width: "100%" }}>
+    <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} className="h-full w-full rounded">
       <TileLayer
-        attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
-
       {spots.map((spot) => (
-        <Marker key={spot.id} position={[spot.latitude, spot.longitude]}>
-          <Popup>{spot.description}</Popup>
+        <Marker
+          key={spot.id}
+          position={[spot.latitude, spot.longitude]}
+        >
+          <Popup>
+            {spot.name && <strong>{spot.name}</strong>}
+            <br />
+            {spot.description}
+          </Popup>
         </Marker>
       ))}
     </MapContainer>

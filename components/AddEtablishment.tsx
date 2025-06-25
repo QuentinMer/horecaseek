@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface OpeningHours {
@@ -9,12 +9,13 @@ interface OpeningHours {
 
 const daysOfWeek = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
 
+type EstablishmentType = "restaurant" | "bar" | "traiteur" | "hotel";
+
 export default function EstablishmentForm() {
   const supabase = createClient();
 
-  // États du formulaire
   const [name, setName] = useState("");
-  const [type, setType] = useState<"restaurant" | "bar" | "traiteur" | "hotel">("restaurant");
+  const [type, setType] = useState<EstablishmentType>("restaurant");
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
   const [phone, setPhone] = useState("");
@@ -22,7 +23,6 @@ export default function EstablishmentForm() {
   const [latitude, setLatitude] = useState<number | "">("");
   const [longitude, setLongitude] = useState<number | "">("");
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
-  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
 
   const [openingHours, setOpeningHours] = useState<OpeningHours>(
     daysOfWeek.reduce((acc, day) => {
@@ -34,7 +34,6 @@ export default function EstablishmentForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Upload des images vers le bucket "establishments"
   const uploadGalleryImages = async (files: File[]): Promise<string[]> => {
     const urls: string[] = [];
     for (const file of files) {
@@ -56,7 +55,6 @@ export default function EstablishmentForm() {
     return urls;
   };
 
-  // Gestion changement horaires
   const handleOpeningHoursChange = (day: string, field: "open" | "close", value: string) => {
     setOpeningHours((prev) => ({
       ...prev,
@@ -67,7 +65,6 @@ export default function EstablishmentForm() {
     }));
   };
 
-  // Toggle ouvert/fermé pour le jour
   const toggleDayClosed = (day: string) => {
     setOpeningHours((prev) => ({
       ...prev,
@@ -75,14 +72,12 @@ export default function EstablishmentForm() {
     }));
   };
 
-  // Soumission formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      // Récupérer user connecté
       const {
         data: { user },
         error: userError,
@@ -90,19 +85,15 @@ export default function EstablishmentForm() {
 
       if (userError || !user) throw new Error("Utilisateur non connecté");
 
-      // Upload images si besoin
-      let galleryUploadedUrls = galleryUrls;
+      let galleryUploadedUrls: string[] = [];
       if (galleryFiles.length > 0) {
-        const uploadedUrls = await uploadGalleryImages(galleryFiles);
-        galleryUploadedUrls = [...galleryUrls, ...uploadedUrls];
+        galleryUploadedUrls = await uploadGalleryImages(galleryFiles);
       }
 
-      // Validation simple
       if (!name) throw new Error("Le nom de l'établissement est requis");
       if (!email) throw new Error("L'email est requis");
       if (latitude === "" || longitude === "") throw new Error("La latitude et la longitude sont requises");
 
-      // Préparation de l'objet établissement avec user_id
       const establishmentData = {
         user_id: user.id,
         name,
@@ -117,15 +108,15 @@ export default function EstablishmentForm() {
         gallery_urls: galleryUploadedUrls,
       };
 
-      // Insert dans Supabase
       const { error: insertError } = await supabase.from("establishments").insert([establishmentData]);
 
       if (insertError) throw insertError;
 
       alert("Établissement ajouté avec succès !");
-      // Optionnel: reset form ou redirection ici
-    } catch (err: any) {
-      setError(err.message || "Une erreur est survenue");
+      // reset formulaire ou redirection si besoin
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Une erreur est survenue");
     } finally {
       setLoading(false);
     }
@@ -150,7 +141,7 @@ export default function EstablishmentForm() {
         Type
         <select
           value={type}
-          onChange={e => setType(e.target.value as any)}
+          onChange={e => setType(e.target.value as EstablishmentType)}
           className="w-full border rounded p-2"
         >
           <option value="restaurant">Restaurant</option>
@@ -210,7 +201,10 @@ export default function EstablishmentForm() {
           type="number"
           step="any"
           value={latitude}
-          onChange={e => setLatitude(parseFloat(e.target.value))}
+          onChange={e => {
+            const val = e.target.value;
+            setLatitude(val === "" ? "" : parseFloat(val));
+          }}
           required
           className="w-full border rounded p-2"
         />
@@ -222,14 +216,17 @@ export default function EstablishmentForm() {
           type="number"
           step="any"
           value={longitude}
-          onChange={e => setLongitude(parseFloat(e.target.value))}
+          onChange={e => {
+            const val = e.target.value;
+            setLongitude(val === "" ? "" : parseFloat(val));
+          }}
           required
           className="w-full border rounded p-2"
         />
       </label>
 
       <fieldset className="border p-4 rounded">
-        <legend className="font-semibold mb-2">Horaires d'ouverture</legend>
+<legend className="font-semibold mb-2">Horaires d&apos;ouverture</legend>
         {daysOfWeek.map(day => (
           <div key={day} className="flex items-center gap-2 mb-2">
             <label className="capitalize w-20">{day}</label>
@@ -279,13 +276,13 @@ export default function EstablishmentForm() {
 
       {error && <p className="text-red-600">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-primary text-white p-2 rounded hover:bg-primary-dark disabled:opacity-50"
-      >
-        {loading ? "Enregistrement..." : "Enregistrer l'établissement"}
-      </button>
+     <button
+  type="submit"
+  disabled={loading}
+  className="bg-primary text-white p-2 rounded hover:bg-primary-dark disabled:opacity-50"
+>
+  {loading ? "Enregistrement..." : <>Enregistrer l&apos;établissement</>}
+</button>
     </form>
   );
 }

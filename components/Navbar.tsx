@@ -13,43 +13,46 @@ const NavBar = () => {
   const [userName, setUserName] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setIsAuthenticated(true);
+useEffect(() => {
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setIsAuthenticated(true);
 
-        // Récupération du profil
-        const { data: profile, error } = await supabase
-          .from("profiles")
-          .select("full_name, avatar_url")
-          .eq("user_id", user.id)
-          .single();
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("full_name, avatar_url")
+        .eq("user_id", user.id)
+        .single();
 
-        if (profile) {
-          setUserName(profile.full_name || user.email);
-          setAvatarUrl(profile.avatar_url || null);
-        } else {
-          setUserName(user.email ?? null);
-          setAvatarUrl(null);
-        }
+      if (error) {
+        console.error("Erreur chargement profil :", error.message);
+        setUserName(user.email ?? null);
+        setAvatarUrl(null);
+      } else if (profile) {
+        setUserName(profile.full_name || user.email);
+        setAvatarUrl(profile.avatar_url || null);
       } else {
-        setIsAuthenticated(false);
-        setUserName(null);
+        setUserName(user.email ?? null);
         setAvatarUrl(null);
       }
-    };
+    } else {
+      setIsAuthenticated(false);
+      setUserName(null);
+      setAvatarUrl(null);
+    }
+  };
 
+  checkUser();
+
+  const { data: listener } = supabase.auth.onAuthStateChange(() => {
     checkUser();
+  });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(() => {
-      checkUser();
-    });
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, [supabase]);
+  return () => {
+    listener.subscription.unsubscribe();
+  };
+}, [supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -61,8 +64,16 @@ const NavBar = () => {
     <nav className="py-2 font-geist shadow-md z-50 shadow-black/10">
       <div className="flex sm:flex-row flex-col sm:justify-between justify-center items-center mx-[2%] mt-1">
         <Link href={isAuthenticated ? "/protected" : "/"} className="flex items-center">
-      <Image src="/assets/img/logo/logoHori.svg" alt="logo" width={150} height={150} />
-    </Link>
+ <Image
+  src="/assets/img/logo/logoHori.svg"
+  alt="logo"
+  width={150}
+  height={150}
+  priority
+    style={{ width: 150, height: "auto" }}  
+
+/>
+</Link>
 
         <div className="flex sm:flex-row sm:gap-3 md:gap-5 sm:mt-0 gap-2 mt-1 items-center">
           {isAuthenticated ? (

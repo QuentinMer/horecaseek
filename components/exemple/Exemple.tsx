@@ -14,7 +14,8 @@ const Exemple = ({ imageSrc, style, position = "left" }: ExempleProps) => {
       }`}
       style={{ position: "relative", ...style }}
     >
-      <div className="w-full h-full">
+      {/* Ajout de relative ici */}
+      <div className="w-full h-full relative">
         <Image
           src={imageSrc}
           alt="exemple"

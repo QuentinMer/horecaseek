@@ -17,24 +17,24 @@ export default function SimpleSignUpForm() {
   const [success, setSuccess] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError(null);
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-  if (error) {
-    setError(error.message);
-  } else if (data.user) {
-    // Utilisateur créé et connecté : rediriger
-    router.push("/auth/profile");
-  } else {
-    // Cas rare : pas d'erreur, mais pas d'utilisateur (?)
-    setError("Erreur inconnue lors de la création du compte.");
-  }
-};
+    if (error) {
+      setError(error.message);
+    } else if (data.user) {
+      setSuccess(true);
+      router.push("/auth/compte");  // redirection vers la page profil
+    } else {
+      setError("Erreur inconnue lors de la création du compte.");
+    }
+  };
 
   return (
     <form onSubmit={handleSignUp} className="flex flex-col gap-4 max-w-sm mx-auto">
@@ -63,7 +63,11 @@ export default function SimpleSignUpForm() {
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      {success && <p className="text-green-600 text-sm">Check your email to confirm your account.</p>}
+      {success && (
+        <p className="text-green-600 text-sm">
+          Inscription réussie ! Tu vas être redirigé vers la création de ton profil.
+        </p>
+      )}
 
       <Button type="submit">Sign up</Button>
     </form>

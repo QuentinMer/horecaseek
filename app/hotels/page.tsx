@@ -13,9 +13,9 @@ interface Establishment {
   longitude: number;
   website: string;
   phone: string;
-  opening_hours: string;
+  opening_hours: Record<string, { open: string; close: string } | null> | string;
   price_range: number;
-  gallery_urls: string[];
+  gallery_urls?: string[];
 }
 
 export default function HotelPage() {
@@ -31,7 +31,7 @@ export default function HotelPage() {
       const { data, error } = await supabase
         .from("establishments")
         .select("*")
-        .eq("type", "hotel"); // filtre par type "hotel"
+        .eq("type", "hotel");
 
       if (error) {
         setError(error.message);
@@ -48,6 +48,29 @@ export default function HotelPage() {
   if (error) return <p className="text-red-600">Erreur : {error}</p>;
   if (establishments.length === 0) return <p>Aucun hôtel trouvé.</p>;
 
+  // Fonction pour afficher lisiblement les horaires
+  function renderOpeningHours(opening_hours: Establishment["opening_hours"]) {
+    if (!opening_hours) return "Non renseigné";
+
+    let hoursObj: Record<string, { open: string; close: string } | null>;
+    if (typeof opening_hours === "string") {
+      try {
+        hoursObj = JSON.parse(opening_hours);
+      } catch {
+        return opening_hours;
+      }
+    } else {
+      hoursObj = opening_hours;
+    }
+
+    return Object.entries(hoursObj)
+      .map(([day, times]) => {
+        if (!times) return `${day}: fermé`;
+        return `${day}: ${times.open} - ${times.close}`;
+      })
+      .join(", ");
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Hôtels</h1>
@@ -57,12 +80,25 @@ export default function HotelPage() {
             <h2 className="font-semibold">{est.name}</h2>
             <p>Email : {est.email}</p>
             <p>Téléphone : {est.phone}</p>
-            <p>Adresse web : <a href={est.website} target="_blank" rel="noreferrer" className="text-blue-600 underline">{est.website}</a></p>
-            <p>Horaires : {est.opening_hours}</p>
+            <p>
+              Adresse web :{" "}
+              <a href={est.website} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                {est.website}
+              </a>
+            </p>
+            <p>Horaires : {renderOpeningHours(est.opening_hours)}</p>
             <p>Gamme de prix : {est.price_range} / 5</p>
             <div className="flex gap-2 overflow-x-auto">
-              {est.gallery_urls.map((url, i) => (
-                <Image key={i} src={url} alt={`Photo ${i + 1}`} width={320} height={240} className="rounded object-cover" />
+              {(est.gallery_urls || []).map((url, i) => (
+                <Image
+                  key={i}
+                  src={url}
+                  alt={`Photo ${i + 1}`}
+                  width={320}
+                  height={240}
+                  className="rounded object-cover"
+                  unoptimized
+                />
               ))}
             </div>
           </li>

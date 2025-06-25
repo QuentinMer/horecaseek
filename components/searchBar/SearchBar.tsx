@@ -1,21 +1,47 @@
-import Image from "next/image";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { CiSearch } from "react-icons/ci";
+
 const SearchBar = () => {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = () => {
+    if (query.trim()) {
+      router.push(`/search?query=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
+
   return (
     <>
       <div className="md:hidden bg-primary">
-        <div className=" p-4 rounded-lg flex flex-col sm:items-start md:w-2/4 h-[120%]">
+        <div className="p-4 rounded-lg flex flex-col sm:items-start md:w-2/4 h-[120%]">
           <h2 className="text-3xl xl:text-4xl lg:text-4xl md:text-3xl sm:text-2xl font-geist font-semibold text-center sm:text-left md:text-left lg:text-left xl:text-left">
             De quoi avez vous envie <br className="sm:hidden lg:block" />
-            aujourd'hui?
+            aujourd&apos;hui?
           </h2>
           <div className="border border-black rounded-md flex flex-row w-[100%] mt-8">
             <input
               type="text"
               placeholder="Recherche rapide"
               className="p-2 w-full rounded-l-md font-geist bg-white text-black"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={onKeyDown}
             />
-            <button className="bg-secondary w-12  border-l-black border-l rounded-r-md flex items-center justify-center cursor-pointer">
+            <button
+              onClick={handleSearch}
+              className="bg-secondary w-12 border-l-black border-l rounded-r-md flex items-center justify-center cursor-pointer"
+            >
               <CiSearch size={30} />
             </button>
           </div>
@@ -32,19 +58,25 @@ const SearchBar = () => {
             backgroundImage: "url('/assets/img/wallpaper/accueil.jpg')",
           }}
         >
-          <div className=" p-4 rounded-lg flex flex-col sm:items-start md:w-2/4 h-[120%] mt-[2%]">
+          <div className="p-4 rounded-lg flex flex-col sm:items-start md:w-2/4 h-[120%] mt-[2%]">
             <h2 className="text-3xl xl:text-4xl lg:text-4xl md:text-3xl sm:text-2xl font-geist font-semibold text-center sm:text-left md:text-left lg:text-left xl:text-left">
               De quoi avez vous envie <br className="sm:hidden lg:block" />
-              aujourd'hui?
+              aujourd&apos;hui?
             </h2>
-           
+
             <div className="border border-black rounded-md flex flex-row w-[75%] mt-8">
               <input
                 type="text"
                 placeholder="Recherche rapide"
                 className="p-2 w-full rounded-l-md font-geist bg-white text-black"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={onKeyDown}
               />
-              <button className="hover:bg-secondary bg-primary w-12  border-l-black border-l rounded-r-md flex items-center justify-center cursor-pointer">
+              <button
+                onClick={handleSearch}
+                className="hover:bg-secondary bg-primary w-12 border-l-black border-l rounded-r-md flex items-center justify-center cursor-pointer"
+              >
                 <CiSearch size={30} />
               </button>
             </div>
@@ -55,7 +87,7 @@ const SearchBar = () => {
           </div>
         </div>
       </div>
-      </>
+    </>
   );
 };
 

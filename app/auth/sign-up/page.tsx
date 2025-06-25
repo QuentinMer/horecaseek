@@ -1,4 +1,3 @@
-import CreateProfileForm from "@/components/createProfileForm";
 import SimpleSignUpForm from "@/components/sign-up-form";
 
 export default function Page() {
