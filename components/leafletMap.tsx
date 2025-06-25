@@ -17,7 +17,6 @@ interface LeafletMapProps {
   spots: Spot[];
   center: [number, number];
   zoom: number;
-  selectedSpot?: Spot | null;
 }
 
 // Fix des icônes Leaflet
@@ -33,7 +32,7 @@ function ChangeMapView({ center }: { center: [number, number] }) {
   const map = useMap();
 
   useEffect(() => {
-    map.setView(center, 13, { animate: true }); // zoom fixé à 13
+    map.setView(center, 13, { animate: true });
   }, [center, map]);
 
   return null;

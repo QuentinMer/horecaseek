@@ -83,7 +83,6 @@ export default function SpotsPage() {
           <div className="mt-4" style={{ width: "100%", height: "300px" }}>
             <LeafletMap
               spots={spots}
-              selectedSpot={selectedSpot}
               center={
                 selectedSpot
                   ? [Number(selectedSpot.latitude), Number(selectedSpot.longitude)]
@@ -99,7 +98,6 @@ export default function SpotsPage() {
       <div className="hidden md:block" style={{ width: "500px", height: "100%" }}>
         <LeafletMap
           spots={spots}
-          selectedSpot={selectedSpot}
           center={
             selectedSpot
               ? [Number(selectedSpot.latitude), Number(selectedSpot.longitude)]
