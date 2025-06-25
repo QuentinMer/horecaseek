@@ -1,8 +1,9 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { useEffect } from "react";
 
 interface Spot {
   id: string;
@@ -28,10 +29,21 @@ const icon = L.icon({
 
 L.Marker.prototype.options.icon = icon;
 
+function ChangeMapView({ center }: { center: [number, number] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(center, map.getZoom(), { animate: true });
+  }, [center, map]);
+
+  return null;
+}
+
 export default function LeafletMap({
   spots,
   center,
   zoom,
+  selectedSpot,
 }: LeafletMapProps) {
   return (
     <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} className="h-full w-full rounded">
@@ -51,6 +63,7 @@ export default function LeafletMap({
           </Popup>
         </Marker>
       ))}
+      <ChangeMapView center={center} />
     </MapContainer>
   );
 }
