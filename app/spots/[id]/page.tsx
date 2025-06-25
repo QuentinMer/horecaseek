@@ -78,7 +78,7 @@ export default function SpotDetailPage() {
       </p>
 
       <div className="w-full" style={{ height: "300px" }}>
-        <LeafletMap spots={[spot]} selectedSpot={spot} center={[spot.latitude, spot.longitude]} zoom={14} />
+        <LeafletMap spots={[spot]} center={[spot.latitude, spot.longitude]} zoom={14} />
       </div>
     </div>
   );
