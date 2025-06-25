@@ -27,14 +27,13 @@ const icon = L.icon({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-
 L.Marker.prototype.options.icon = icon;
 
 function ChangeMapView({ center }: { center: [number, number] }) {
   const map = useMap();
 
   useEffect(() => {
-    map.setView(center, map.getZoom(), { animate: true });
+    map.setView(center, 13, { animate: true }); // zoom fixé à 13
   }, [center, map]);
 
   return null;
@@ -47,16 +46,18 @@ export default function LeafletMap({
   selectedSpot,
 }: LeafletMapProps) {
   return (
-    <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} className="h-full w-full rounded">
+    <MapContainer
+      center={center}
+      zoom={zoom}
+      scrollWheelZoom={false}
+      className="h-full w-full rounded"
+    >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
       {spots.map((spot) => (
-        <Marker
-          key={spot.id}
-          position={[spot.latitude, spot.longitude]}
-        >
+        <Marker key={spot.id} position={[spot.latitude, spot.longitude]}>
           <Popup>
             {spot.name && <strong>{spot.name}</strong>}
             <br />
