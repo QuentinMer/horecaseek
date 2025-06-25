@@ -21,6 +21,8 @@ export default function SpotsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null);
   const [showMapMobile, setShowMapMobile] = useState(false);
+  const NAMUR_COORDS: [number, number] = [50.4664, 4.8674];
+
 
   useEffect(() => {
     async function fetchSpots() {
@@ -47,19 +49,18 @@ export default function SpotsPage() {
 
   return (
     <div className="flex flex-col md:flex-row h-auto md:h-screen">
-      
+
       {/* Liste des spots */}
       <div className="flex-1 border-r overflow-y-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Liste des spots</h1>
-        
+
         <ul className="flex flex-col gap-3">
           {spots.map((spot) => (
             <li
               key={spot.id}
               onClick={() => setSelectedSpot(spot)}
-              className={`p-2 border rounded cursor-pointer hover:bg-gray-100 ${
-                selectedSpot?.id === spot.id ? "bg-gray-200" : ""
-              }`}
+              className={`p-2 border rounded cursor-pointer hover:bg-gray-100 ${selectedSpot?.id === spot.id ? "bg-gray-200" : ""
+                }`}
             >
               <h3 className="font-semibold">{spot.name}</h3>
               <p className="text-sm text-gray-600">{spot.description}</p>
@@ -86,7 +87,7 @@ export default function SpotsPage() {
               center={
                 selectedSpot
                   ? [selectedSpot.latitude, selectedSpot.longitude]
-                  : [45.75, 4.85]
+                  : NAMUR_COORDS
               }
               zoom={13}
             />

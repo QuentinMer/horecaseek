@@ -27,6 +27,7 @@ const icon = L.icon({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+
 L.Marker.prototype.options.icon = icon;
 
 function ChangeMapView({ center }: { center: [number, number] }) {
