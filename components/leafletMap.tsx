@@ -43,7 +43,6 @@ export default function LeafletMap({
   spots,
   center,
   zoom,
-  selectedSpot,
 }: LeafletMapProps) {
   return (
     <MapContainer
