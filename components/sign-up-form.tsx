@@ -17,24 +17,37 @@ export default function SimpleSignUpForm() {
   const [success, setSuccess] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
+  e.preventDefault();
+  setError(null);
+  setSuccess(false);
 
+  try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
 
-    if (error) {
-      setError(error.message);
-    } else if (data.user) {
-      setSuccess(true);
-      router.push("/auth/compte");  // redirection vers la page profil
-    } else {
-      setError("Erreur inconnue lors de la création du compte.");
-    }
-  };
+    if (error) throw error;
+    if (!data.user) throw new Error("Utilisateur non créé");
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        user_id: data.user.id,
+        full_name: "",      
+        phone: "",
+        avatar_url: "",
+        type: "client",     
+      });
+
+    if (profileError) throw profileError;
+
+    setSuccess(true);
+    router.push("/auth/profile");  
+  } catch (error: unknown) {
+    setError(error instanceof Error ? error.message : "Erreur inconnue lors de la création du compte.");
+  }
+};
 
   return (
     <div className="flex flex-col w-full items-center justify-center p-6 md:p-10">
