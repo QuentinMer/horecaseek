@@ -114,7 +114,7 @@ export default function ProfileCard() {
   if (!profile) return <p>Profil introuvable.</p>;
 
   return (
-    <div className={`flex flex-col md:flex-row px-[5%] min-h-screen min-w-screen ${bgClass}`}>
+    <div className={`flex flex-col md:flex-row px-[5%] min-h-screen min-w-screen ${bgClass} font)-geist`}>
       <div className="max-w-sm mx-auto font-geist mt-8 p-4 flex flex-col items-center gap-4">
         <SpotlightCard
           className={`custom-spotlight-card border ${borderClass} bg-white shadow-lg p-6`}
@@ -143,11 +143,11 @@ export default function ProfileCard() {
         </Link>
       </div>
 
-      <div className="flex flex-col justify-start items-center mt-8 pt-8 md:mt-0 md:ml-8 max-w-md w-full">
+      <div className="flex flex-col justify-start items-center mt-8 pt-8 md:mt-0 md:ml-8 max-w-md w-full md:mx-48 font-geist">
         {profile.type === "professional" ? (
           <>
             <h3 className="text-lg font-semibold mb-4">Mes établissements</h3>
-            <Link href="/protected/establishment/new" className="text-blue-600 hover:underline mb-4">
+            <Link href="/protected/establishment/new" className="text-black bg-primary border border-primary px-3 py-2 rounded-md shadow-md hover:text-white mb-4">
               Ajouter un établissement
             </Link>
 
@@ -158,7 +158,7 @@ export default function ProfileCard() {
                 {establishments.map((est) => (
                   <li
                     key={est.id}
-                    className="border rounded p-3 flex justify-between items-center"
+                    className="border border-primary bg-white shadow-md rounded-md rounded p-3 flex justify-between items-center"
                   >
                     <div>
                       <p className="font-medium">{est.name}</p>
@@ -166,7 +166,7 @@ export default function ProfileCard() {
                       <p className="text-sm text-gray-600">{est.email}</p>
                     </div>
                     <button
-                      className="text-blue-600 hover:underline"
+                      className="text-black hover:text-primary"
                       onClick={() => router.push(`/protected/establishment/${est.id}`)}
                     >
                       Modifier
@@ -178,8 +178,8 @@ export default function ProfileCard() {
           </>
         ) : (
           <>
-            <h3 className="text-lg font-semibold mb-4">Mes spots</h3>
-            <Link href="/protected/spot/new" className="text-blue-600 hover:underline mb-4">
+            <h3 className="text-lg font-semibold mb-4 md:text-2xl mt-12">Mes spots</h3>
+            <Link href="/protected/spot/new" className="text-black hover:text-white mb-4 border border-secondary bg-secondary px-4 py-2 rounded-md">
               Ajouter un spot
             </Link>
 
@@ -196,7 +196,7 @@ export default function ProfileCard() {
       return (
         <li
           key={spot.id}
-          className="border rounded p-3 flex gap-3 items-center"
+          className="border border-secondary bg-white shadow-md rounded-md p-3 flex gap-3 items-center"
         >
           {spot.image_urls && spot.image_urls.length > 0 && (
             <div className="flex-shrink-0">

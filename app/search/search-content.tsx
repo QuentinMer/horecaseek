@@ -91,7 +91,7 @@ const SearchResultsPage = () => {
   const totalPages = Math.ceil(totalResults / RESULTS_PER_PAGE);
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6 font-geist">
       <h1 className="text-2xl font-bold mb-4">Résultats pour &quot;{query}&quot;</h1>
 
       {loading && (
@@ -114,15 +114,15 @@ const SearchResultsPage = () => {
 
       <ul className="flex flex-col gap-3">
         {results.map((item) => (
-          <li key={item.id} className="border p-3 rounded hover:bg-gray-100">
+          <li key={item.id} className="border border-primary p-3 rounded hover:bg-primary cursor-pointer">
             {item.type === "establishment" ? (
-              <Link href={`/protected/establishment/${item.id}`}>
-                <span className="text-blue-600 font-semibold cursor-pointer">{item.name}</span>
-              </Link>
+              <Link href={`/establishment/${item.id}`}>
+  <span className="text-black font-semibold cursor-pointer">{item.name}</span>
+</Link>
             ) : (
-              <Link href={`/protected/spot/${item.id}`}>
-                <span className="text-blue-600 cursor-pointer">{item.description}</span>
-              </Link>
+            <Link href={`/spots/${item.id}`}>
+  <span className="text-black cursor-pointer">{item.description}</span>
+</Link>
             )}
           </li>
         ))}

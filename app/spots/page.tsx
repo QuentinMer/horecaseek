@@ -49,17 +49,18 @@ export default function SpotsPage() {
 
   return (
     <div className="flex flex-col md:flex-row h-auto md:h-screen">
-      {/* Liste des spots */}
-      <div className="flex-1 border-r overflow-y-auto p-4">
+      {/* Liste des spots : 1/3 largeur + margin horizontal sur md+ */}
+      <div className="md:w-1/3 md:mx-6 border-r overflow-y-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Liste des spots</h1>
+        <span className="my-1">Creez un compte pour plus de détails sur les spots</span>
 
         <ul className="flex flex-col gap-3">
           {spots.map((spot) => (
             <li
               key={spot.id}
               onClick={() => setSelectedSpot(spot)}
-              className={`p-2 border rounded cursor-pointer hover:bg-gray-100 ${
-                selectedSpot?.id === spot.id ? "bg-gray-200" : ""
+              className={`p-2 border rounded cursor-pointer hover:bg-secondary ${
+                selectedSpot?.id === spot.id ? "bg-primary" : ""
               }`}
             >
               <h3 className="font-semibold">{spot.name}</h3>
@@ -94,8 +95,8 @@ export default function SpotsPage() {
         )}
       </div>
 
-      {/* Carte desktop */}
-      <div className="hidden md:block" style={{ width: "500px", height: "100%" }}>
+      {/* Carte desktop : prend le reste de la largeur */}
+      <div className="hidden md:flex md:flex-1 md:h-full">
         <LeafletMap
           spots={spots}
           center={

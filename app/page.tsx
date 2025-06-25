@@ -1,4 +1,4 @@
-import Exemple from "@/components/exemple/Exemple";
+import RollingGallery from "@/components/AnimatedCard";
 import Event from "@/components/icon/Event";
 import Glass from "@/components/icon/Glass";
 import House from "@/components/icon/House";
@@ -73,33 +73,9 @@ export default async function Home() {
           <p className="text-center">Parce que les bons plans sont encore meilleurs quand ils sont partagés.</p>
         </div>
 
-        <div className="overflow-hidden mx-2 md:mx-0 my-4 flex flex-col md:flex-row items-center gap-3 md:gap-8">
-          <p className="md:hidden">&quot;Le resto est top et class &quot;</p>
-
-          <Exemple imageSrc="/assets/img/card/restaurant-exemple.jpg" position="left" />
-          <p className="hidden md:block">&quot;Le resto est top et class &quot;</p>
-        </div>
-
-        <div className="overflow-hidden mx-2 md:mx-0 my-4 flex flex-col md:flex-row items-center gap-3 md:gap-8">
-          <p className="hidden md:block">&quot;Le resto est top et class &quot;</p>
-          <Exemple imageSrc="/assets/img/card/bar-exemple.jpg" position="right" />
-        </div>
-
-        <div className="overflow-hidden mx-2 md:mx-0 my-4 flex flex-col md:flex-row items-center gap-3 md:gap-8">
-          <Exemple imageSrc="/assets/img/card/event-exemple.jpg" position="left" />
-          <p className="hidden md:block">&quot;Le resto est top et class &quot;</p>
-        </div>
-
-        <div className="overflow-hidden mx-2 md:mx-0 my-4 flex flex-col md:flex-row items-center gap-3 md:gap-8">
-          <p className="hidden md:block">&quot;Le resto est top et class &quot;</p>
-
-          <Exemple imageSrc="/assets/img/card/spot-exemple.jpg" position="right" />
-        </div>
-
-        <div className="overflow-hidden mx-2 md:mx-0 my-4 flex flex-col md:flex-row items-center gap-3 md:gap-8">
-          <Exemple imageSrc="/assets/img/card/hotel-exemple.jpg" position="left" />
-          <p className="hidden md:block">&quot;Le resto est top et class &quot;</p>
-        </div>
+       <div className="mt-5">
+<RollingGallery autoplay={true} pauseOnHover={true}/>
+       </div>
       </main>
     </>
   );

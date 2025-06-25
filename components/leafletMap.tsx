@@ -45,11 +45,12 @@ export default function LeafletMap({
 }: LeafletMapProps) {
   return (
     <MapContainer
-      center={center}
-      zoom={zoom}
-      scrollWheelZoom={false}
-      className="h-full w-full rounded"
-    >
+  key={`${center[0]}-${center[1]}`}  
+  center={center}
+  zoom={zoom}
+  scrollWheelZoom={false}
+  className="h-full w-full rounded"
+>
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

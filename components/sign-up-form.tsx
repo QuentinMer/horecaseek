@@ -37,8 +37,9 @@ export default function SimpleSignUpForm() {
   };
 
   return (
-    <form onSubmit={handleSignUp} className="flex flex-col gap-4 max-w-sm mx-auto">
-      <h2 className="text-xl font-semibold">Sign up</h2>
+    <div className="flex flex-col w-full items-center justify-center p-6 md:p-10">
+    <form onSubmit={handleSignUp} className="flex flex-col font-geist gap-4 max-w-sm mx-auto border border-primary p-12 rounded-md shadow-md">
+      <h2 className="text-xl font-semibold">Inscription</h2>
 
       <div>
         <Label htmlFor="email">Email</Label>
@@ -48,18 +49,18 @@ export default function SimpleSignUpForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-        />
+          />
       </div>
 
       <div>
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">Mot de passe</Label>
         <Input
           id="password"
           type="password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-        />
+          />
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -69,7 +70,13 @@ export default function SimpleSignUpForm() {
         </p>
       )}
 
-      <Button type="submit">Sign up</Button>
+      <Button className="hover:bg-secondary" type="submit">Créer compte</Button>
     </form>
+    <div className="text-center mt-4 bg-primary text-black font-geist p-4 rounded">
+<p>
+  Après l&apos;insertion de votre email et mot de passe<br />
+  vous serez redirigé·e pour finaliser la création de votre compte
+</p>    </div>
+      </div>
   );
 }
